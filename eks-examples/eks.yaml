@@ -1,0 +1,32 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: my-eks-cluster
+  region: us-east-1  # Change to your region
+
+vpc:
+  subnets:
+    private:
+      us-east-1a:
+        id: subnet-xxxxaaa1  # Replace with your actual private subnet IDs
+      us-east-1b:
+        id: subnet-xxxxbbb2
+      us-east-1c:
+        id: subnet-xxxxccc3
+      us-east-1d:
+        id: subnet-xxxxddd4
+
+managedNodeGroups:
+  - name: small-workers
+    instanceType: t3.small
+    desiredCapacity: 4
+    minSize: 2
+    maxSize: 6
+    privateNetworking: true
+    volumeSize: 20
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        ebs: true
+        cloudWatch: true
