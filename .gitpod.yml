@@ -2,8 +2,9 @@ image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - name: Setup
-    init: aws configure list
+  - name: Verify Tools
+    init: aws --version && kubectl version --client && eksctl version
+    command: echo "✅ All tools installed"
 
 vscode:
   extensions:
