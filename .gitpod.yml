@@ -1,0 +1,10 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - name: Setup
+    init: aws configure list
+
+vscode:
+  extensions:
+    - amazonwebservices.aws-toolkit-vscode
