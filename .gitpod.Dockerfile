@@ -2,6 +2,7 @@ FROM gitpod/workspace-full:latest
 
 USER root
 
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     unzip \
     curl \
@@ -9,18 +10,19 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && apt-get clean
 
-# AWS CLI
+# Install AWS CLI v2
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
     && unzip awscliv2.zip \
     && ./aws/install \
     && rm -rf awscliv2.zip aws
 
-# kubectl (fixed with bash)
-RUN bash -c 'curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"' \
+# Install kubectl (safe step-by-step method)
+ENV KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
+RUN curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
     && chmod +x kubectl \
-    && mv kubectl /usr/local/bin/
+    && mv kubectl /usr/local/bin/kubectl
 
-# eksctl
+# Install eksctl
 RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" \
     | tar xz -C /tmp \
-    && mv /tmp/eksctl /usr/local/bin
+    && mv /tmp/eksctl /usr/local/bin/eksctl
