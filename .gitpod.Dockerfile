@@ -16,15 +16,17 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     && ./aws/install \
     && rm -rf awscliv2.zip aws
 
-# ✅ Install kubectl (with bash inline)
-RUN bash -c ' \
+# Install kubectl (latest stable)
+RUN bash -c " \
     version=$(curl -s https://dl.k8s.io/release/stable.txt) && \
-    curl -LO "https://dl.k8s.io/release/${version}/bin/linux/amd64/kubectl" && \
+    curl -LO https://dl.k8s.io/release/${version}/bin/linux/amd64/kubectl && \
     chmod +x kubectl && \
     mv kubectl /usr/local/bin/ \
-'
+"
 
 # Install eksctl
 RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" \
     | tar xz -C /tmp \
     && mv /tmp/eksctl /usr/local/bin/eksctl
+
+USER gitpod
