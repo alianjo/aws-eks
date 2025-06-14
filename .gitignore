@@ -1,0 +1,30 @@
+# Local .terraform directories
+**/.terraform/*
+!.terraform/modules
+!.terraform/providers
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+.terraform.*
+
+# Ignore override files
+*.tfvars
+*.tfvars.json
+
+# Ignore plan files
+*.tfplan
+
+# Ignore sensitive variable files
+secrets.auto.tfvars
+*.auto.tfvars.json
+
+# MacOS/Linux metadata files
+.DS_Store
