@@ -1,6 +1,16 @@
 # main.tf
 
 # Configure the AWS Provider
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+  }
+  required_version = ">= 1.3.0"
+}
+
 provider "aws" {
   region = var.aws_region
 }
@@ -70,6 +80,14 @@ resource "aws_eip" "nat_gateway_eip" {
   }
 }
 
+resource "aws_eip" "nat_gateway_eip_2" {
+  depends_on = [aws_internet_gateway.eks_igw] # Ensure IGW exists before EIP for NAT GW
+
+  tags = {
+    Name = "${var.cluster_name}-nat-eip-2"
+  }
+}
+
 # Create NAT Gateway in a public subnet for private subnet outbound internet access
 resource "aws_nat_gateway" "eks_nat_gateway" {
   allocation_id = aws_eip.nat_gateway_eip.id
@@ -77,6 +95,19 @@ resource "aws_nat_gateway" "eks_nat_gateway" {
 
   tags = {
     Name = "${var.cluster_name}-nat-gateway"
+  }
+
+  # Ensure the NAT Gateway is created after the public subnet is available
+  depends_on = [aws_internet_gateway.eks_igw]
+}
+
+# Create Second NAT Gateway in a public subnet for private subnet outbound internet access
+resource "aws_nat_gateway" "eks_nat_gateway_2" {
+  allocation_id = aws_eip.nat_gateway_eip_2.id
+  subnet_id     = aws_subnet.public_subnets[1].id # Place NAT GW in the first public subnet
+
+  tags = {
+    Name = "${var.cluster_name}-nat-gateway-2"
   }
 
   # Ensure the NAT Gateway is created after the public subnet is available
@@ -118,10 +149,28 @@ resource "aws_route_table" "private_route_table" {
 }
 
 resource "aws_route_table_association" "private_route_table_associations" {
-  count          = length(aws_subnet.private_subnets)
-  subnet_id      = aws_subnet.private_subnets[count.index].id
+  subnet_id      = aws_subnet.private_subnets[0].id
   route_table_id = aws_route_table.private_route_table.id
 }
+
+resource "aws_route_table" "private_route_table_2" {
+  vpc_id = aws_vpc.eks_vpc.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.eks_nat_gateway_2.id
+  }
+
+  tags = {
+    Name = "${var.cluster_name}-private-rt-2"
+  }
+}
+
+resource "aws_route_table_association" "private_route_table_associations_2" {
+  subnet_id      = aws_subnet.private_subnets[1].id
+  route_table_id = aws_route_table.private_route_table_2.id
+}
+
 
 # --- EKS Cluster Setup ---
 
@@ -178,6 +227,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   depends_on = [
     aws_route_table_association.public_route_table_associations,
     aws_route_table_association.private_route_table_associations,
+    aws_route_table_association.private_route_table_associations_2,
   ]
 
   tags = {
