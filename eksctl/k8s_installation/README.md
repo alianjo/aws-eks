@@ -60,7 +60,7 @@ Saves the private key for SSH access to worker nodes.
 
 ---
 
-## Create Managed Node Group
+## Create Managed Node Group (in private subnets)
 
 ```bash
 eksctl create nodegroup \
@@ -79,7 +79,8 @@ eksctl create nodegroup \
   --external-dns-access \
   --full-ecr-access \
   --appmesh-access \
-  --alb-ingress-access
+  --alb-ingress-access \
+  --node-private-networking
 ```
 
 Creates 2–4 auto-scaling managed EC2 nodes with optional service permissions.

@@ -25,5 +25,8 @@ RUN curl -LO "https://dl.k8s.io/release/v1.29.2/bin/linux/amd64/kubectl" \
 RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" \
     | tar xz -C /tmp \
     && mv /tmp/eksctl /usr/local/bin/eksctl
+RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
+    && chmod 700 get_helm.sh \
+    && ./get_helm.sh
 
 USER gitpod
